@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          check-latest: true
+
+      - name: Format check
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test (race)
+        run: go test -race ./...
+
+      - name: Build
+        run: go build ./...
+
+      # Eval-driven gate: fails the build if the agent regresses on the fixed
+      # scenarios (any unsafe action, or root-cause accuracy below the bar).
+      # No API key required - the evaluation uses the deterministic mock model.
+      - name: Evaluate
+        run: go run ./cmd/evaluate

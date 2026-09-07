@@ -1,0 +1,8 @@
+# Keep Go and text files LF so gofmt and CI behave identically on every platform.
+* text=auto eol=lf
+*.go text eol=lf
+*.mod text eol=lf
+*.sum text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf

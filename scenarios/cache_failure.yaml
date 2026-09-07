@@ -1,0 +1,17 @@
+# Documentation only — the executable definition is in internal/simulator/scenarios.go.
+id: cache_failure
+title: Cache hit rate collapsed
+alert:
+  service: cache
+  metric: cache_hit_rate_pct
+  value: 8
+  severity: critical
+faults:
+  cache:
+    cache_hit_rate_pct: 8    # baseline 94
+    latency_p99_ms: 400      # baseline 5
+    healthy: false
+root_cause: cache holding poisoned/stale entries, hit rate collapsed
+correct_fix:
+  action: clear_cache
+  service: cache

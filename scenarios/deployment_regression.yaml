@@ -1,0 +1,21 @@
+# Documentation only — the executable definition is in internal/simulator/scenarios.go.
+id: deployment_regression
+title: Error spike after API deploy
+alert:
+  service: api
+  metric: error_rate_pct
+  value: 22
+  severity: critical
+deployments:
+  - service: api
+    version: v2.4.1
+    minutes_ago: 6
+faults:
+  api:
+    error_rate_pct: 22       # baseline 0.2
+    latency_p99_ms: 600      # baseline 120
+    healthy: false
+root_cause: recent api deployment introduced a regression, error rate spiked
+correct_fix:
+  action: rollback_deployment  # HIGH risk — always requires human approval
+  service: api

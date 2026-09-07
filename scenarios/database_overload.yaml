@@ -1,0 +1,18 @@
+# Documentation only — the executable definition is in internal/simulator/scenarios.go.
+id: database_overload
+title: Database connection pool exhausted
+alert:
+  service: database
+  metric: db_connections
+  value: 100
+  severity: critical
+faults:
+  database:
+    db_connections: 100      # baseline 35
+    latency_p99_ms: 2500     # baseline 120
+    error_rate_pct: 18       # baseline 0.2
+    healthy: false
+root_cause: database connection pool exhausted, saturating query latency
+correct_fix:
+  action: reduce_db_connections
+  service: database

@@ -1,0 +1,22 @@
+# AI Incident Commander configuration.
+# Environment variables override these (see cmd/server): ADDR, AUTO_APPROVE_MEDIUM,
+# LLM_BASE_URL, LLM_API_KEY, LLM_MODEL.
+
+server:
+  addr: ":8080"
+
+agent:
+  # evidence-collection worker pool size
+  workers: 4
+  # let MEDIUM-safety remediations (restart, scale, clear cache, cap db connections)
+  # run without a human. HIGH actions (rollback) always require approval regardless.
+  auto_approve_medium: false
+  # hard safety rails on the bounded agent loop
+  max_tool_calls: 40
+
+model:
+  # Leave base_url empty to use the deterministic mock model (default; no API key).
+  # Set it to any OpenAI-compatible endpoint (OpenAI, Azure OpenAI, Ollama, vLLM) to
+  # use a live model.
+  base_url: ""
+  model: "gpt-4o-mini"
