@@ -3,6 +3,11 @@
 This document explains why the AI Incident Commander is built the way it is, the
 trade-offs taken on purpose, and what it deliberately does **not** try to be.
 
+![architecture](docs/diagrams/architecture.png)
+
+*The model sits in exactly one step; deterministic Go collects evidence, validates the
+diagnosis, and gates every action. Source: [`docs/diagrams/architecture.svg`](docs/diagrams/architecture.svg).*
+
 ## The one rule everything follows
 
 > The LLM proposes and reasons. Deterministic code validates and executes.
