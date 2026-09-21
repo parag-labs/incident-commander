@@ -1,0 +1,10 @@
+[package]
+name = "incident-commander-core"
+version = "0.1.0"
+edition = "2021"
+description = "Deterministic decision core of the AI Incident Commander (Rust port)."
+license = "MIT"
+
+[lib]
+name = "incident_commander"
+path = "src/lib.rs"

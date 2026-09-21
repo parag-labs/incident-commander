@@ -4,3 +4,23 @@ bin/
 *.out
 coverage.*
 .DS_Store
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Rust (new rust/ port)
+rust/target/
+rust/Cargo.lock
+
+# Node / TypeScript
+node_modules/
+
+# .NET
+**/bin/
+**/obj/
+*.pdb
+
+# Java
+java/target/

@@ -141,6 +141,50 @@ Because the mock reasoner is deterministic, these are exact and enforced in CI �
 build fails on any unsafe action or a drop in accuracy. (With a live model the numbers
 become a genuine quality signal rather than a fixed value; the harness is identical.)
 
+## Six languages, one behavior
+
+The agent, its tools, the HTTP service, and the simulator stay in Go. But the
+**deterministic decision core** — the part that decides *what is legal, what is safe, and
+how well the agent did* — is small, dependency-free, and worth having everywhere policy
+logic runs. So it is ported verbatim to five more languages, each behaving
+byte-for-byte identically to the Go reference.
+
+Ported modules (pure arithmetic and state transitions only):
+
+- `pkg/models/models.go` — the typed domain contracts
+- `internal/incident/statemachine.go` — the legal-transition table and incident lifecycle
+- `internal/policy/policy.go` — the low/medium/high risk gate
+- `internal/eval/eval.go` — the scorecard (grounding, unsafe-action detection, accuracy)
+- `internal/obs/metrics.go` — the Prometheus-text counter/gauge registry
+
+Deliberately **not** ported (they stay in Go, the original language): `internal/agent/`
+and `internal/agent/llm/` (orchestration + the model client), `internal/api/` (HTTP + MCP),
+`internal/tools/` (execution, authz, audit), `internal/storage/`, `internal/simulator/`,
+and `cmd/`. Being explicit about the boundary is the point: the policy core is portable
+and testable in isolation; the service and the model are not, and do not need to be.
+
+| Language   | Role       | Tests | Verify                                   |
+| ---------- | ---------- | ----: | ---------------------------------------- |
+| Go         | reference  |   13¹ | `go test ./...`                          |
+| Python     | port       |    52 | `PYTHONPATH=src pytest -q`               |
+| Rust       | port       |    52 | `cargo test` · `clippy` · `fmt`          |
+| C#         | port       |    52 | `dotnet test`                            |
+| Java       | port       |    52 | `mvn test`                               |
+| TypeScript | port       |    52 | `npm run lint` · `npm test`              |
+
+¹ Top-level test functions in the four ported Go packages; most are table-driven with
+many inline cases. The ports follow a *many small focused tests* convention, so the same
+behavior is pinned by more, smaller test functions.
+
+Each port lives in its own top-level directory (`python/`, `rust/`, `csharp/`, `java/`,
+`ts/`) and is exercised by its own CI job. Behavioral subtleties that had to match the
+reference exactly: `%.0f` percentage rounding is round-half-to-even (Go, Python, Rust,
+and JS agree; C# needed `MidpointRounding.ToEven` and Java needed `Math.rint`, both of
+which otherwise round half-up); the metrics registry reproduces Go's `%g` shortest-float
+formatting and sorts metric names in byte/ordinal order (C# needs `StringComparer.Ordinal`
+explicitly); `Diagnosis.Top()` breaks confidence ties toward the first hypothesis; and the
+scorecard's fixed-width layout is column-aligned identically everywhere.
+
 ## Security & guardrails
 
 - **Tool results are untrusted data.** The model can only cite evidence that was actually
@@ -189,8 +233,17 @@ incident-commander/
 ├── pkg/models/       the typed domain contracts
 ├── prompts/          the model prompts (kept out of code)
 ├── docs/             architecture, agent design, security, evaluation
+├── python/           Python port of the deterministic decision core
+├── rust/             Rust port of the deterministic decision core
+├── csharp/           C# port of the deterministic decision core
+├── java/             Java port of the deterministic decision core
+├── ts/               TypeScript port of the deterministic decision core
 └── DESIGN.md         the design argument and the non-goals
 ```
+
+The Go tree above is the running service; the five language directories mirror only the
+`models` / `incident` / `policy` / `eval` / `obs` decision core (see
+[Six languages, one behavior](#six-languages-one-behavior)).
 
 ## Design
 

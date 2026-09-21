@@ -1,0 +1,16 @@
+[project]
+name = "incident-commander-core"
+version = "0.1.0"
+description = "Deterministic decision core of the AI Incident Commander (Python port)."
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
