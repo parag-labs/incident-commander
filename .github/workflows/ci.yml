@@ -1,4 +1,4 @@
-name: CI (six languages)
+name: Continuous integration (6 languages)
 
 on:
   push:
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: csharp
+        working-directory: csharp/tests
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
